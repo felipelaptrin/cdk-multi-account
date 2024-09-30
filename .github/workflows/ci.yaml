@@ -1,0 +1,25 @@
+name: "Lint and Test"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cdk-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install dependencies
+        run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+
+      - run: yarn prettier
+
+      - run: yarn compile
+
+      - run: yarn synth
+
+      - run: yarn test
