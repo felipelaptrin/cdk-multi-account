@@ -1,0 +1,39 @@
+version: '3'
+
+archors:
+  check_aws_credentials: &check_aws_credentials
+     sh: 'aws sts get-caller-identity'
+     msg: "AWS credentials are not valid or are expired!"
+
+env:
+  AWS_REGION: us-east-2
+  AWS_SHARED_ACCOUNT: "730335516527"
+
+tasks:
+  init:
+    desc: Install all code dependencies using YARN
+    silent: true
+    cmds:
+      - yarn
+  bootstrap-shared-assets:
+    desc: Bootstrap the shared account (contains shared assets and CI/CD pipeline). Make sure AWS credentials are set.
+    silent: true
+    preconditions:
+      - *check_aws_credentials
+    cmds:
+      - echo "Bootstrapping the {{.AWS_SHARED_ACCOUNT}} account in the {{.AWS_REGION}} region..."
+      - yarn cdk bootstrap aws://{{.AWS_SHARED_ACCOUNT}}/{{.AWS_REGION}}
+  bootstrap-workload:
+    desc: Bootstrap an workload account to allow deployments from the shared/ci-cd AWS account.  Make sure AWS credentials are set.
+    silent: true
+    preconditions:
+      - *check_aws_credentials
+    vars:
+      AWS_ACCOUNT:
+        sh: aws sts get-caller-identity --query Account --output text
+    cmds:
+      - echo "Bootstrapping the {{.AWS_ACCOUNT}} account in the {{.AWS_REGION}} region..."
+      - |
+        yarn cdk bootstrap aws://{{.AWS_ACCOUNT}}/{{.AWS_REGION}} \
+        --trust {{.AWS_SHARED_ACCOUNT}} --trust-for-lookup {{.AWS_SHARED_ACCOUNT}} \
+        --cloudformation-execution-policies "arn:aws:iam::aws:policy/AdministratorAccess"
