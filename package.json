@@ -17,8 +17,8 @@
     "test:fix": "jest --updateSnapshot"
   },
   "dependencies": {
-    "aws-cdk": "^2.159.1",
-    "aws-cdk-lib": "^2.159.1",
+    "aws-cdk": "^2.160.0",
+    "aws-cdk-lib": "^2.160.0",
     "constructs": "^10.3.0",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2"
